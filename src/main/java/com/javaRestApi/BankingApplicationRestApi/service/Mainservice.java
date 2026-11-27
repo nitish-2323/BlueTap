@@ -15,28 +15,37 @@ public class Mainservice {
     private final CustomerRepository mainRepositry;
     private final PasswordEncoder passwordEncoder;
 
-    public Mainservice(CustomerRepository mainRepositry,
-                       PasswordEncoder passwordEncoder) {
+    public Mainservice(
+            CustomerRepository mainRepositry,
+            PasswordEncoder passwordEncoder) {
+
         this.mainRepositry = mainRepositry;
         this.passwordEncoder = passwordEncoder;
     }
 
     public CustomerDto save(CustomerDto dto, long customerId) {
 
-        CustomerDto existing = mainRepositry.findBycustomerId(customerId);
+        CustomerDto existing =
+                mainRepositry.findBycustomerId(customerId);
 
         if (existing != null) {
-            throw new UserExecption("Id must be unique, please check Customer id");
+            throw new UserExecption(
+                    "Customer ID already exists"
+            );
         }
 
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+        dto.setCustomerId(customerId);
+        dto.setPassword(
+                passwordEncoder.encode(dto.getPassword())
+        );
 
         return mainRepositry.save(dto);
     }
 
-    public CustomerDto getInfo(CustomerDto dto, long customerId) {
+    public CustomerDto getInfo(long customerId) {
 
-        CustomerDto obj = mainRepositry.findBycustomerId(customerId);
+        CustomerDto obj =
+                mainRepositry.findBycustomerId(customerId);
 
         if (obj == null) {
             throw new UserNotFound("Invalid customer");
@@ -45,9 +54,12 @@ public class Mainservice {
         return obj;
     }
 
-    public CustomerDto updateObj(CustomerDto dto, long customerId) {
+    public CustomerDto updateObj(
+            CustomerDto dto,
+            long customerId) {
 
-        CustomerDto obj = mainRepositry.findBycustomerId(customerId);
+        CustomerDto obj =
+                mainRepositry.findBycustomerId(customerId);
 
         if (obj == null) {
             throw new UserNotFound("Customer not found");
@@ -66,10 +78,13 @@ public class Mainservice {
     @Transactional
     public CustomerDto delete(long customerId) {
 
-        CustomerDto obj = mainRepositry.findBycustomerId(customerId);
+        CustomerDto obj =
+                mainRepositry.findBycustomerId(customerId);
 
         if (obj == null) {
-            throw new UserNotFound("Customer not found for deletion");
+            throw new UserNotFound(
+                    "Customer not found for deletion"
+            );
         }
 
         mainRepositry.delete(obj);

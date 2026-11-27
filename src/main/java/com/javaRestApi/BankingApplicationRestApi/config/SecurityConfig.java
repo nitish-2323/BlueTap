@@ -2,9 +2,9 @@
 package com.javaRestApi.BankingApplicationRestApi.config;
 
 import com.javaRestApi.BankingApplicationRestApi.security.JwtFilter;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,17 +26,39 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http)
+            throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, ex) ->
+                                response.sendError(
+                                        HttpStatus.UNAUTHORIZED.value(),
+                                        "Authentication required"
+                                )
+                        )
+                        .accessDeniedHandler((request, response, ex) ->
+                                response.sendError(
+                                        HttpStatus.FORBIDDEN.value(),
+                                        "Access denied"
+                                )
+                        )
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/offline/**", "/auth/**").permitAll()
+                        .requestMatchers(
+                                "/offline/**",
+                                "/auth/**",
+                                "/customer/addUser/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
 
@@ -55,8 +77,8 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authConfig
-    ) throws Exception {
+            AuthenticationConfiguration authConfig)
+            throws Exception {
         return authConfig.getAuthenticationManager();
     }
 }

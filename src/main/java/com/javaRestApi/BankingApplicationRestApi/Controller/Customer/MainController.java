@@ -1,10 +1,9 @@
+
 package com.javaRestApi.BankingApplicationRestApi.Controller.Customer;
 
 import com.javaRestApi.BankingApplicationRestApi.Model.CustomerDTO.CustomerDto;
 import com.javaRestApi.BankingApplicationRestApi.Model.CustomerDTO.ResponseDTO;
-import com.javaRestApi.BankingApplicationRestApi.Repository.CustomerRepository;
 import com.javaRestApi.BankingApplicationRestApi.service.Mainservice;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,60 +14,101 @@ import java.util.List;
 @RestController
 @RequestMapping("/customer")
 public class MainController {
-    @Autowired
-    private ResponseDTO responseDTO;
-    @Autowired
-    private Mainservice mainservice;
-  @Autowired
-  private CustomerRepository repositry;
+
+    private final Mainservice mainservice;
+
+    public MainController(Mainservice mainservice) {
+        this.mainservice = mainservice;
+    }
 
     @PostMapping("/addUser/{customerId}")
-    public ResponseEntity<ResponseDTO> addUser(@RequestBody CustomerDto dto, @PathVariable long customerId){
-          CustomerDto obj = mainservice.save(dto,customerId);
+    public ResponseEntity<ResponseDTO> addUser(
+            @RequestBody CustomerDto dto,
+            @PathVariable long customerId) {
 
-          responseDTO.setError(false);
-          responseDTO.setMsg("Created sucessfully ...");
-          responseDTO.setStatusCode(201);
-        List<CustomerDto> customerDTOList = new ArrayList<>();
-        customerDTOList.add(obj);
-        responseDTO.setMydtos(customerDTOList);
-        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        CustomerDto obj = mainservice.save(dto, customerId);
 
-    }
-    @GetMapping("/userInfo/{customerId}")
-    public ResponseEntity<ResponseDTO> userInfo(CustomerDto dto, @PathVariable long customerId){
-        CustomerDto obj =mainservice.getInfo(dto,customerId);
+        ResponseDTO responseDTO = new ResponseDTO();
         responseDTO.setError(false);
-        responseDTO.setMsg("You can read info");
-        responseDTO.setStatusCode(HttpStatus.OK.value());
-        List<CustomerDto> list =new ArrayList<>();
-        list.add(obj);
-        responseDTO.setMydtos(list);
-        return new ResponseEntity<>(responseDTO,HttpStatus.OK);
-    }
-     @PutMapping("/userUpdate/{customerId}")
-    public ResponseEntity<ResponseDTO> userUpdate(@RequestBody CustomerDto dto, @PathVariable long customerId){
-        CustomerDto obj =mainservice.updateObj(dto,customerId);
-        responseDTO.setStatusCode(HttpStatus.FOUND.value());
-        responseDTO.setError(false);
-        responseDTO.setMsg("Update sucessfully");
+        responseDTO.setMsg("Created successfully");
+        responseDTO.setStatusCode(HttpStatus.CREATED.value());
+
         List<CustomerDto> list = new ArrayList<>();
-        list.add(obj);
+        list.add(toSafeCustomer(obj));
+
         responseDTO.setMydtos(list);
-        return new ResponseEntity<>(responseDTO,HttpStatus.OK);
-     }
-     @DeleteMapping("/deleteUser/{customerId}")
-     public ResponseEntity<ResponseDTO> Delete(@PathVariable long customerId){
-        CustomerDto dto=  mainservice.delete(customerId);
-         responseDTO.setStatusCode(HttpStatus.OK.value());
-         responseDTO.setMsg("Deleted customer from database");
-         responseDTO.setError(false);
-         List<CustomerDto> list = new ArrayList<>();
-         list.add(dto);
-         responseDTO.setMydtos(list);
-         return new ResponseEntity<>(responseDTO,HttpStatus.OK);
 
-     }
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+    }
 
+    @GetMapping("/userInfo/{customerId}")
+    public ResponseEntity<ResponseDTO> userInfo(
+            @PathVariable long customerId) {
 
+        CustomerDto obj = mainservice.getInfo(customerId);
+
+        ResponseDTO responseDTO = new ResponseDTO();
+        responseDTO.setError(false);
+        responseDTO.setMsg("Customer information retrieved successfully");
+        responseDTO.setStatusCode(HttpStatus.OK.value());
+
+        List<CustomerDto> list = new ArrayList<>();
+        list.add(toSafeCustomer(obj));
+
+        responseDTO.setMydtos(list);
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @PutMapping("/userUpdate/{customerId}")
+    public ResponseEntity<ResponseDTO> userUpdate(
+            @RequestBody CustomerDto dto,
+            @PathVariable long customerId) {
+
+        CustomerDto obj = mainservice.updateObj(dto, customerId);
+
+        ResponseDTO responseDTO = new ResponseDTO();
+        responseDTO.setError(false);
+        responseDTO.setMsg("Customer updated successfully");
+        responseDTO.setStatusCode(HttpStatus.OK.value());
+
+        List<CustomerDto> list = new ArrayList<>();
+        list.add(toSafeCustomer(obj));
+
+        responseDTO.setMydtos(list);
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @DeleteMapping("/deleteUser/{customerId}")
+    public ResponseEntity<ResponseDTO> deleteUser(
+            @PathVariable long customerId) {
+
+        CustomerDto obj = mainservice.delete(customerId);
+
+        ResponseDTO responseDTO = new ResponseDTO();
+        responseDTO.setError(false);
+        responseDTO.setMsg("Customer deleted successfully");
+        responseDTO.setStatusCode(HttpStatus.OK.value());
+
+        List<CustomerDto> list = new ArrayList<>();
+        list.add(toSafeCustomer(obj));
+
+        responseDTO.setMydtos(list);
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    private CustomerDto toSafeCustomer(CustomerDto customer) {
+
+        CustomerDto safeCustomer = new CustomerDto();
+
+        safeCustomer.setCustomerId(customer.getCustomerId());
+        safeCustomer.setFullName(customer.getFullName());
+        safeCustomer.setEmail(customer.getEmail());
+        safeCustomer.setPhoneNumber(customer.getPhoneNumber());
+        safeCustomer.setAddress(customer.getAddress());
+
+        return safeCustomer;
+    }
 }

@@ -3,11 +3,11 @@ package com.javaRestApi.BankingApplicationRestApi.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -20,18 +20,17 @@ public class JwtUtil {
     private static final long EXPIRATION_MS = 15 * 60 * 1000;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(
-                secret.getBytes(StandardCharsets.UTF_8)
-        );
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(
-                        System.currentTimeMillis() + EXPIRATION_MS
-                ))
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + EXPIRATION_MS)
+                )
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -53,7 +52,6 @@ public class JwtUtil {
                     .parseClaimsJws(token);
 
             return true;
-
         } catch (Exception e) {
             return false;
         }

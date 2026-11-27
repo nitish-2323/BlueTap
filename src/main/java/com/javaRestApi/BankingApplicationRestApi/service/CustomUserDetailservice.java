@@ -1,27 +1,37 @@
+//
 //package com.javaRestApi.BankingApplicationRestApi.service;
 //
-//import com.javaRestApi.BankingApplicationRestApi.Model.CustomerDTO.CustomerDTO;
-//import com.javaRestApi.BankingApplicationRestApi.Repositry.MainRepositry;
-//import org.springframework.beans.factory.annotation.Autowired;
+//import com.javaRestApi.BankingApplicationRestApi.Model.CustomerDTO.CustomerDto;
+//import com.javaRestApi.BankingApplicationRestApi.Repository.CustomerRepository;
 //import org.springframework.security.core.userdetails.User;
 //import org.springframework.security.core.userdetails.UserDetails;
 //import org.springframework.security.core.userdetails.UserDetailsService;
 //import org.springframework.security.core.userdetails.UsernameNotFoundException;
 //import org.springframework.stereotype.Service;
 //
-//import java.util.ArrayList;
-//
 //@Service
-//public class CustomUserDetailservice  implements UserDetailsService {
+//public class CustomUserDetailservice implements UserDetailsService {
 //
-//    @Autowired
-//    private MainRepositry repositry;
+//    private final CustomerRepository customerRepository;
+//
+//    public CustomUserDetailservice(CustomerRepository customerRepository) {
+//        this.customerRepository = customerRepository;
+//    }
+//
 //    @Override
-//    public UserDetails loadUserByUsername(String fullName) throws UsernameNotFoundException {
-//        CustomerDTO obj =repositry
-//        .findByFullName(fullName);
-//        if( obj == null) throw new UsernameNotFoundException("No username found in DB");
+//    public UserDetails loadUserByUsername(String username)
+//            throws UsernameNotFoundException {
 //
-//        return new User(obj.getFullName(),obj.getPassword(),new ArrayList<>());
+//        CustomerDto customer = customerRepository.findByFullName(username);
+//
+//        if (customer == null) {
+//            throw new UsernameNotFoundException(
+//                    "Customer not found: " + username);
+//        }
+//
+//        return User.withUsername(customer.getFullName())
+//                .password(customer.getPassword())
+//                .authorities("ROLE_USER")
+//                .build();
 //    }
 //}
